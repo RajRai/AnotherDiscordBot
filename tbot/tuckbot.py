@@ -42,7 +42,7 @@ async def say_goodnight(member):
         message_pool.append("Don't forget to keep an eye out for ghosts...")
 
     if 'Europe' in [str(r) for r in member.roles] or 'EU' in [str(r) for r in member.roles]:
-        tz = pytz.timezone('Europe/Paris')
+        tz = pytz.timezone('Europe/London')
     else:
         tz = pytz.timezone('US/Eastern')
     now = datetime.now(tz)
