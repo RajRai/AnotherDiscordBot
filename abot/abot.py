@@ -20,9 +20,10 @@ async def channel(ctx, channel):
     ch = discord.utils.get(ctx.guild.text_channels, name=channel)
     channels[ctx.guild] = ch
     if ch is None:
-        ctx.channel.send("Couldn't find a channel with that name...")
-    await ctx.channel.send("Will send goodnight messages in " + ch.name)
-    updateStoredChannel(ctx.guild.id, ch.id)
+        await ctx.channel.send("Couldn't find a channel with that name...")
+    else:
+        await ctx.channel.send("Will send goodnight messages in " + ch.name)
+        updateStoredChannel(ctx.guild.id, ch.id)
 
 
 async def say_goodnight(member):
@@ -32,10 +33,10 @@ async def say_goodnight(member):
                     "I'll miss you, as much as a Discord bot can."
                     "And if you dream about a toilet, don't use it."
                     ]
-    if 'Phasmophobia' in member.roles or 'Phasmo' in member.roles:
+    if 'Phasmophobia' in [str(r) for r in member.roles] or 'Phasmo' in [str(r) for r in member.roles]:
         message_pool.append("Don't forget to keep an eye out for ghosts...")
 
-    if 'Europe' in member.roles:
+    if 'Europe' in [str(r) for r in member.roles]:
         tz = pytz.timezone('Europe/Paris')
     else:
         tz = pytz.timezone('US/Eastern')
