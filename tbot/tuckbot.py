@@ -15,7 +15,12 @@ bot = commands.Bot(command_prefix="!")
 channels = {}
 
 
+def is_fulcrum_or_raj(ctx):
+    return ctx.sender.role.name == "Fulcrum" or ctx.sender.id == 296153936665247745
+
+
 @bot.command(name='channel', help='Tells the bot which channel to send messages in.')
+@commands.check(is_fulcrum_or_raj)
 async def channel(ctx, channel):
     ch = discord.utils.get(ctx.guild.text_channels, name=channel)
     channels[ctx.guild] = ch
