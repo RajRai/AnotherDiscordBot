@@ -16,7 +16,7 @@ channels = {}
 
 
 def is_fulcrum_or_raj(ctx):
-    return ctx.author.role.name == "Fulcrum" or ctx.author.id == 296153936665247745
+    return "Fulcrum" in [str(r) for r in ctx.author.roles] or ctx.author.id == 296153936665247745
 
 
 @bot.command(name='channel', help='Tells the bot which channel to send messages in.')
