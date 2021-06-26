@@ -8,7 +8,7 @@ from datetime import datetime
 import pytz
 import random as rng
 
-from abot.token import TOKEN
+from abot.atoken import TOKEN
 
 bot = commands.Bot(command_prefix="!")
 
