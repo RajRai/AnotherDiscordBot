@@ -41,7 +41,7 @@ async def say_goodnight(member):
     if 'Phasmophobia' in [str(r) for r in member.roles] or 'Phasmo' in [str(r) for r in member.roles]:
         message_pool.append("Don't forget to keep an eye out for ghosts...")
 
-    if 'Europe' in [str(r) for r in member.roles]:
+    if 'Europe' in [str(r) for r in member.roles] or 'EU' in [str(r) for r in member.roles]:
         tz = pytz.timezone('Europe/Paris')
     else:
         tz = pytz.timezone('US/Eastern')
