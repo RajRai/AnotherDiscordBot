@@ -35,7 +35,7 @@ async def say_goodnight(member):
     message_pool = ["Sweet dreams!",
                     "May the sheep you count tonight be numerous and fluffy.",
                     "Sleep well!",
-                    "I'll miss you, as much as a Discord bot can."
+                    "I'll miss you, as much as a Discord bot can.",
                     "And if you dream about a toilet, don't use it."
                     ]
     if 'Phasmophobia' in [str(r) for r in member.roles] or 'Phasmo' in [str(r) for r in member.roles]:
