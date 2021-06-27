@@ -31,8 +31,16 @@ def is_server_manager(ctx):
     return ctx.message.author.server_permissions.manage_guild
 
 
+@bot.command(name='announcement', help='Dev use only')
+@commands.check(is_dev)
+async def announcement(ctx, message):
+    for guild in channels:
+        if guild.name == "Raj's server":
+            await channels[guild].send(message)
+
+
 @bot.command(name='addphrase', help='Adds a custom goodnight phrase to the bot')
-@commands.check(is_server_manager() or is_dev())
+@commands.check(is_server_manager or is_dev)
 async def add_phrase(ctx, phrase):
     global phrases
     try:
@@ -48,7 +56,7 @@ async def add_phrase(ctx, phrase):
 
 
 @bot.command(name='showphrases', help='Shows the custom goodnight phrases saved by the bot')
-@commands.check(is_server_manager() or is_dev())
+@commands.check(is_server_manager or is_dev)
 async def show_phrases(ctx):
     lst = phrases[ctx.guild]
     out = "Stored phrases:\n"
@@ -57,7 +65,7 @@ async def show_phrases(ctx):
 
 
 @bot.command(name='removephrase', help='Removes a custom goodnight phrase from the bot')
-@commands.check(is_server_manager() or is_dev())
+@commands.check(is_server_manager or is_dev)
 async def remove_phrase(ctx, which):
     try:
         idx = int(which)
@@ -71,7 +79,7 @@ async def remove_phrase(ctx, which):
 
 
 @bot.command(name='channel', help='Tells the bot which channel to send messages in.')
-@commands.check(is_server_manager() or is_dev())
+@commands.check(is_server_manager or is_dev)
 async def channel(ctx, channel):
     ch = discord.utils.get(ctx.guild.text_channels, name=channel)
     channels[ctx.guild] = ch
