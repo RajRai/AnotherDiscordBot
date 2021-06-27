@@ -37,15 +37,17 @@ def server_manager_or_dev(ctx):
 
 @bot.command(name='announcement', help='Dev use only')
 @commands.check(is_dev)
-async def announcement(ctx, message):
+async def announcement(ctx, *words):
+    message = " ".join(words)
     for guild in channels:
         await channels[guild].send(message)
 
 
 @bot.command(name='addphrase', help='Adds a custom goodnight phrase to the bot')
 @commands.check(server_manager_or_dev)
-async def add_phrase(ctx, phrase):
+async def add_phrase(ctx, *words):
     global phrases
+    phrase = " ".join(words)
     try:
         phrases[ctx.guild].append(phrase)
         store_phrases(ctx.guild.id, phrase)
