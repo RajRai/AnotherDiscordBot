@@ -36,10 +36,15 @@ def create_table(conn, create_table_sql):
 def main():
     database = join(dirname(dirname(__file__)), 'sqlite', 'botdb.db')
 
-    sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS channels (
-                                        guild text primary key,
+    sql_create_projects_table = """CREATE TABLE IF NOT EXISTS channels (
+                                        guild text PRIMARY KEY,
                                         channel text
-                                    ); """
+                                    ); 
+                                    CREATE TABLE IF NOT EXISTS phrases (
+                                        guild text,
+                                        phrase text,
+                                        CONSTRAINT pkey PRIMARY KEY (guild, phrase)
+                                    )"""
 
     # create a database connection
     conn = create_connection(database)

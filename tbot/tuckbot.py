@@ -10,17 +10,68 @@ import random as rng
 
 from tbot.atoken import TOKEN
 
-bot = commands.Bot(command_prefix="!")
+prefix = '!'
+
+bot = commands.Bot(command_prefix=prefix)
 
 channels = {}
 
+phrases = {}
+
 
 def is_admin(ctx):
-    return ctx.message.author.server_permissions.administrator or ctx.author.id == 296153936665247745
+    return ctx.message.author.server_permissions.administrator
+
+
+def is_dev(ctx):
+    return ctx.author.id == 296153936665247745
+
+
+def is_server_manager(ctx):
+    return ctx.message.author.server_permissions.manage_guild
+
+
+@bot.command(name='addphrase', help='Adds a custom goodnight phrase to the bot')
+@commands.check(is_server_manager() or is_dev())
+async def add_phrase(ctx, phrase):
+    global phrases
+    try:
+        phrases[ctx.guild].append(phrase)
+        store_phrases(ctx.guild.id, phrase)
+        await ctx.channel.send("Saved the phrase!")
+    except KeyError:
+        phrases[ctx.guild] = [phrase]
+        store_phrases(ctx.guild.id, phrase)
+        await ctx.channel.send("Saved the phrase!")
+    except Error:
+        await ctx.channel.send("Couldn't add that phrase to the list...")
+
+
+@bot.command(name='showphrases', help='Shows the custom goodnight phrases saved by the bot')
+@commands.check(is_server_manager() or is_dev())
+async def show_phrases(ctx):
+    lst = phrases[ctx.guild]
+    out = "Stored phrases:\n"
+    for n in range(0, len(lst)):
+        out += f"{n}. {lst[n]}\n"
+
+
+@bot.command(name='removephrase', help='Removes a custom goodnight phrase from the bot')
+@commands.check(is_server_manager() or is_dev())
+async def remove_phrase(ctx, which):
+    try:
+        idx = int(which)
+    except ValueError:
+        await ctx.reply(
+            f"Sorry, but I was expecting a number referencing a stored phrase. Do {prefix}showphrases for the list.")
+    phrase = phrases[ctx.guild][idx]
+    phrases[ctx.guild].remove(idx)
+    remove_stored_phrase(ctx.guild.id, phrase)
+    await ctx.reply("Removed the phrase from storage.")
 
 
 @bot.command(name='channel', help='Tells the bot which channel to send messages in.')
-@commands.check(is_admin())
+@commands.check(is_server_manager() or is_dev())
 async def channel(ctx, channel):
     ch = discord.utils.get(ctx.guild.text_channels, name=channel)
     channels[ctx.guild] = ch
@@ -28,7 +79,7 @@ async def channel(ctx, channel):
         await ctx.channel.send("Couldn't find a channel with that name...")
     else:
         await ctx.channel.send("Will send goodnight messages in " + ch.name)
-        updateStoredChannel(ctx.guild.id, ch.id)
+        store_channel(ctx.guild.id, ch.id)
 
 
 async def say_goodnight(member):
@@ -40,6 +91,7 @@ async def say_goodnight(member):
                     ]
     if 'Phasmophobia' in [str(r) for r in member.roles] or 'Phasmo' in [str(r) for r in member.roles]:
         message_pool.append("Don't forget to keep an eye out for ghosts...")
+    message_pool.extend(phrases[member.guild])
 
     if 'Europe' in [str(r) for r in member.roles] or 'EU' in [str(r) for r in member.roles]:
         tz = pytz.timezone('Europe/London')
@@ -62,7 +114,41 @@ async def on_voice_state_update(member, before, after):
             await say_goodnight(member)
 
 
-def updateStoredChannel(guild, channel):
+def get_stored_phrases():
+    data = get_from_db("SELECT * FROM phrases")
+    phrases = {}
+    for row in data:
+        guild = bot.get_guild(int(row[0]))
+        phrase = row[1]
+        phrases[guild].append(phrase)
+    return phrases
+
+
+def store_phrases(guild, phrase):
+    db = connectToDB()
+    cur = db.cursor()
+    try:
+        cur.execute("INSERT INTO phrases VALUES (?,?)", [guild, phrase])
+    except Exception as e:
+        print(e)
+        try:
+            cur.execute("UPDATE phrases SET phrase = ? WHERE guild = ?;", [phrase, guild])
+        except Exception as e:
+            print(e)
+    db.commit()
+    db.close()
+    print(phrases)
+
+
+def remove_stored_phrase(guild, phrase):
+    db = connectToDB()
+    cur = db.cursor()
+    cur.execute("DELETE FROM phrases WHERE guild = ? AND phrase = ?", [guild, phrase])
+    db.commit()
+    db.close()
+
+
+def store_channel(guild, channel):
     db = connectToDB()
     cur = db.cursor()
     try:
@@ -80,15 +166,21 @@ def updateStoredChannel(guild, channel):
 
 def get_stored_channels():
     channels = {}
-    db = connectToDB()
-    cur = db.cursor()
-    cur.execute("SELECT * FROM channels")
-    data = cur.fetchall()
+    data = get_from_db("SELECT * FROM channels")
     for row in data:
         guild = bot.get_guild(int(row[0]))
         channel = bot.get_channel(int(row[1]))
         channels[guild] = channel
     return channels
+
+
+def get_from_db(sql):
+    db = connectToDB()
+    cur = db.cursor()
+    cur.execute(sql)
+    data = cur.fetchall()
+    db.close()
+    return data
 
 
 def connectToDB():
@@ -104,8 +196,9 @@ def connectToDB():
 
 @bot.event
 async def on_ready():
-    global channels
+    global channels, phrases
     channels = get_stored_channels()
+    phrases = get_stored_phrases()
 
 
 bot.run(TOKEN)
