@@ -89,7 +89,7 @@ async def remove_phrase(ctx, which):
     await ctx.reply("Removed the phrase from storage.")
 
 
-@bot.command(name='channel', help='Tells the bot which channel to send messages in.')
+@bot.command(name='channel', help='Tells the bot which channel to send messages in')
 @commands.check(server_manager_or_dev)
 async def channel(ctx, channel):
     ch = discord.utils.get(ctx.guild.text_channels, name=channel)
