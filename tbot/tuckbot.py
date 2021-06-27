@@ -10,7 +10,7 @@ import random as rng
 
 from tbot.atoken import TOKEN
 
-prefix = '!'
+prefix = '^'
 
 bot = commands.Bot(command_prefix=prefix)
 
