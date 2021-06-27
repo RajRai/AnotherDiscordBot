@@ -107,7 +107,7 @@ async def say_goodnight(member):
         message_pool.append("Don't forget to keep an eye out for ghosts...")
     try:
         message_pool.extend(phrases[member.guild])
-    except Error:
+    except KeyError:
         pass
 
     if 'Europe' in [str(r) for r in member.roles] or 'EU' in [str(r) for r in member.roles]:
