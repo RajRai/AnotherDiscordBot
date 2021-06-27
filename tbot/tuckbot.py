@@ -1,6 +1,5 @@
-from os.path import dirname, join
 import discord
-import sqlite3
+from tbot.dbops import *
 from sqlite3 import Error
 import asyncio
 from discord.ext import commands
@@ -17,6 +16,8 @@ bot = commands.Bot(command_prefix=prefix)
 channels = {}
 
 phrases = {}
+
+nicknames = {}  # {User: Nickname}
 
 
 def is_admin(ctx):
@@ -41,6 +42,21 @@ async def announcement(ctx, *words):
     message = " ".join(words)
     for guild in channels:
         await channels[guild].send(message)
+
+
+@bot.command(name='setnickname', help='Tell Tucker what to call you')
+async def set_nickname(ctx, *words):
+    name = " ".join(words)
+    nicknames[ctx.author.id] = name
+    store_nickname(ctx.author.id, name)
+    await ctx.reply(f"Ok, set your nickname to {name}")
+
+
+@bot.command(name='removenickname', help='Tells Tucker to use your mention when talking to you')
+async def remove_nickname(ctx):
+    nicknames.pop(ctx.author.id)
+    remove_nickname(ctx.author.id)
+    await ctx.reply(f"Removed your nickname {ctx.author.mention}")
 
 
 @bot.command(name='addphrase', help='Adds a custom goodnight phrase to the bot')
@@ -120,18 +136,22 @@ async def say_goodnight(member):
     else:
         tz = pytz.timezone('US/Eastern')
     now = datetime.now(tz)
-    if now.hour >= 22 or now.hour <= 6:
+    if now.hour >= 22 or now.hour <= 6 or (member.guild.name == "Raj's server"):
         randomized_message = rng.choice(message_pool)
         try:
-            await channels[member.guild].send("Goodnight, " + member.mention + "! " + randomized_message)
-        except:
+            if member.id in nicknames:
+                await channels[member.guild].send(f"Goodnight, {nicknames[member.id]}! {randomized_message}")
+            else:
+                await channels[member.guild].send(f"Goodnight, {member.mention}! {randomized_message}")
+        except Error:
             pass
 
 
 @bot.event
 async def on_voice_state_update(member, before, after):
     if before.channel is not None and after.channel is None:
-        await asyncio.sleep(15)
+        if member.guild.name != "Raj's server":
+            await asyncio.sleep(15)
         if member is not None and member.voice is None:
             await say_goodnight(member)
 
@@ -144,92 +164,14 @@ async def on_command_error(ctx, error):
         await ctx.reply("You lack the permissions to use that command...")
 
 
-def get_stored_phrases():
-    data = get_from_db("SELECT * FROM phrases")
-    phrases = {}
-    for row in data:
-        guild = bot.get_guild(int(row[0]))
-        phrase = row[1]
-        try:
-            phrases[guild].append(phrase)
-        except KeyError:
-            phrases[guild] = [phrase]
-    return phrases
-
-
-def store_phrases(guild, phrase):
-    db = connectToDB()
-    cur = db.cursor()
-    try:
-        cur.execute("INSERT INTO phrases VALUES (?,?)", [guild, phrase])
-    except Exception as e:
-        print(e)
-        try:
-            cur.execute("UPDATE phrases SET phrase = ? WHERE guild = ?;", [phrase, guild])
-        except Exception as e:
-            print(e)
-    db.commit()
-    db.close()
-
-
-def remove_stored_phrase(guild, phrase):
-    db = connectToDB()
-    cur = db.cursor()
-    cur.execute("DELETE FROM phrases WHERE guild = ? AND phrase = ?", [guild, phrase])
-    db.commit()
-    db.close()
-
-
-def store_channel(guild, channel):
-    db = connectToDB()
-    cur = db.cursor()
-    try:
-        cur.execute("INSERT INTO channels VALUES (?,?)", [guild, channel])
-    except Exception as e:
-        print(e)
-        try:
-            cur.execute("UPDATE channels SET channel = ? WHERE guild = ?;", [channel, guild])
-        except Exception as e:
-            print(e)
-    db.commit()
-    db.close()
-
-
-def get_stored_channels():
-    channels = {}
-    data = get_from_db("SELECT * FROM channels")
-    for row in data:
-        guild = bot.get_guild(int(row[0]))
-        channel = bot.get_channel(int(row[1]))
-        channels[guild] = channel
-    return channels
-
-
-def get_from_db(sql):
-    db = connectToDB()
-    cur = db.cursor()
-    cur.execute(sql)
-    data = cur.fetchall()
-    db.close()
-    return data
-
-
-def connectToDB():
-    db_file = join(dirname(dirname(__file__)), 'sqlite', 'botdb.db')
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file, isolation_level=None)
-        return conn
-    except Error as e:
-        print(e)
-    return conn
 
 
 @bot.event
 async def on_ready():
-    global channels, phrases
-    channels = get_stored_channels()
-    phrases = get_stored_phrases()
+    global channels, phrases, nicknames
+    channels = get_stored_channels(bot)
+    phrases = get_stored_phrases(bot)
+    nicknames = get_stored_nicknames()
 
 
 bot.run(TOKEN)

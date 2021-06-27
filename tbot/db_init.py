@@ -1,23 +1,5 @@
-import os
-from os.path import dirname, join
-import sqlite3
+from tbot.dbops import connectToDB as create_connection
 from sqlite3 import Error
-
-
-def create_connection(db_file):
-    """ create a database connection to the SQLite database
-        specified by db_file
-    :param db_file: database file
-    :return: Connection object or None
-    """
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
-
-    return conn
 
 
 def create_table(conn, create_table_sql):
@@ -34,8 +16,6 @@ def create_table(conn, create_table_sql):
 
 
 def main():
-    database = join(dirname(dirname(__file__)), 'sqlite', 'botdb.db')
-
     sql_create_projects_table = """CREATE TABLE IF NOT EXISTS channels (
                                         guild text PRIMARY KEY,
                                         channel text
@@ -48,14 +28,20 @@ def main():
                                         CONSTRAINT pkey PRIMARY KEY (guild, phrase)
                                     );"""
 
+    sql_create_nicknames_table = """CREATE TABLE IF NOT EXISTS nicknames (
+                                        account text PRIMARY KEY,
+                                        nickname text
+                                    );"""
+
     # create a database connection
-    conn = create_connection(database)
+    conn = create_connection()
 
     # create tables
     if conn is not None:
         # create projects table
         create_table(conn, sql_create_projects_table)
         create_table(conn, sql_create_phrases_table)
+        create_table(conn, sql_create_nicknames_table)
     else:
         print("Error! cannot create the database connection.")
 
