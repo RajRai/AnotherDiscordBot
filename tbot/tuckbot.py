@@ -55,7 +55,7 @@ async def set_nickname(ctx, *words):
 @bot.command(name='removenickname', help='Tells Tucker to use your mention when talking to you')
 async def remove_nickname(ctx):
     nicknames.pop(ctx.author.id)
-    remove_nickname(ctx.author.id)
+    remove_stored_nickname(ctx.author.id)
     await ctx.reply(f"Removed your nickname {ctx.author.mention}")
 
 
