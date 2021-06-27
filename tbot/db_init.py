@@ -40,11 +40,13 @@ def main():
                                         guild text PRIMARY KEY,
                                         channel text
                                     ); 
-                                    CREATE TABLE IF NOT EXISTS phrases (
+                                    """
+
+    sql_create_phrases_table = """CREATE TABLE IF NOT EXISTS phrases (
                                         guild text,
                                         phrase text,
                                         CONSTRAINT pkey PRIMARY KEY (guild, phrase)
-                                    )"""
+                                    );"""
 
     # create a database connection
     conn = create_connection(database)
@@ -53,6 +55,7 @@ def main():
     if conn is not None:
         # create projects table
         create_table(conn, sql_create_projects_table)
+        create_table(conn, sql_create_phrases_table)
     else:
         print("Error! cannot create the database connection.")
 
