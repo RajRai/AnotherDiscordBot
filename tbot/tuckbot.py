@@ -133,8 +133,10 @@ async def on_voice_state_update(member, before, after):
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
+    if isinstance(error, commands.MissingRequiredArgument):
         await ctx.reply("A required argument for that command is missing!")
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.reply("You lack the permissions to use that command...")
 
 
 def get_stored_phrases():
