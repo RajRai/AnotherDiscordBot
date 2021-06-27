@@ -61,7 +61,10 @@ async def add_phrase(ctx, phrase):
 @bot.command(name='showphrases', help='Shows the custom goodnight phrases saved by the bot')
 @commands.check(server_manager_or_dev)
 async def show_phrases(ctx):
-    lst = phrases[ctx.guild]
+    if ctx.guild in phrases:
+        lst = phrases[ctx.guild]
+    else:
+        lst = []
     out = "Stored phrases:\n"
     for n in range(0, len(lst)):
         out += f"{n+1}. {lst[n]}\n"
