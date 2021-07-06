@@ -19,6 +19,7 @@ bot = commands.Bot(command_prefix=prefix)
 channels = {}  # {Guild: Channel}
 phrases = {}  # {Guild: [Phrases]}
 nicknames = {}  # {User: Nickname}
+disabled = []
 
 
 def is_admin(ctx):
@@ -49,6 +50,20 @@ async def announcement(ctx, *words):
     message = " ".join(sentence)
     for guild in channels:
         await channels[guild].send(message)
+
+
+@bot.command(name='disable', help='Tells Tucker not to tuck you in')
+async def disable(ctx):
+    disabled.append(ctx.author.id)
+    store_disabled(ctx.author.id)
+    await ctx.reply("Ok, disabled your goodnight messages")
+
+
+@bot.command(name='enable', help='Tells Tucker to tuck you in')
+async def enable(ctx):
+    disabled.remove(ctx.author.id)
+    remove_disabled(ctx.author.id)
+    await ctx.reply("Ok, enabled your goodnight messages")
 
 
 @bot.command(name='setnickname', help='Tell Tucker what to call you')
@@ -143,7 +158,7 @@ async def say_goodnight(member):
     else:
         tz = pytz.timezone('US/Eastern')
     now = datetime.now(tz)
-    if now.hour >= 22 or now.hour <= 6 or (member.guild.name == "Raj's server"):
+    if (now.hour >= 22 or now.hour <= 6 or (member.guild.name == "Raj's server")) and member.id not in disabled:
         randomized_message = rng.choice(message_pool)
         try:
             if member.id in nicknames:
@@ -173,14 +188,16 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_ready():
-    global channels, phrases, nicknames
+    global channels, phrases, nicknames, disabled
     channels = get_stored_channels(bot)
     phrases = get_stored_phrases(bot)
     nicknames = get_stored_nicknames()
+    disabled = get_disabled()
 
     print(channels)
     print(phrases)
     print(nicknames)
+    print(disabled)
 
     if debug:
         for guild in list(channels.keys()):

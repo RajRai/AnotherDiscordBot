@@ -3,6 +3,33 @@ from sqlite3 import Error
 from os.path import join, dirname
 
 
+def get_disabled():
+    data = get_from_db("SELECT * FROM disabled")
+    ids = []
+    for row in data:
+        ids.append(int(row[0]))
+    return ids
+
+
+def store_disabled(account):
+    db = connectToDB()
+    cur = db.cursor()
+    try:
+        cur.execute("INSERT INTO disabled VALUES (?)", [account])
+    except Exception as e:
+        print(e)
+    db.commit()
+    db.close()
+
+
+def remove_disabled(account):
+    db = connectToDB()
+    cur = db.cursor()
+    cur.execute("DELETE FROM disabled WHERE account = ?", [account])
+    db.commit()
+    db.close()
+
+
 def get_stored_nicknames():
     data = get_from_db("SELECT * FROM nicknames")
     names = {}
@@ -109,7 +136,6 @@ def connectToDB():
     conn = None
     try:
         conn = sqlite3.connect(db_file, isolation_level=None)
-        return conn
     except Error as e:
         print(e)
     return conn

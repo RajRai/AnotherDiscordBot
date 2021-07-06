@@ -33,6 +33,10 @@ def main():
                                         nickname text
                                     );"""
 
+    sql_create_disabled_table = """CREATE TABLE IF NOT EXISTS disabled (
+                                        account text PRIMARY KEY
+                                    );"""
+
     # create a database connection
     conn = create_connection()
 
@@ -42,6 +46,7 @@ def main():
         create_table(conn, sql_create_projects_table)
         create_table(conn, sql_create_phrases_table)
         create_table(conn, sql_create_nicknames_table)
+        create_table(conn, sql_create_disabled_table)
     else:
         print("Error! cannot create the database connection.")
 
