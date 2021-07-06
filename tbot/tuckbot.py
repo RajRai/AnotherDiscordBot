@@ -208,9 +208,12 @@ async def on_ready():
     print(disabled)
 
     if debug:
+        await bot.change_presence(status=discord.Status.idle, activity=discord.Game(name='bot development simulator'))
         for guild in list(channels.keys()):
             if guild.name != "Raj's server":
                 channels.pop(guild)
+    else:
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=f'{prefix}help for commands'))
 
 
 def parse_mode():
