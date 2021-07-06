@@ -54,7 +54,8 @@ async def announcement(ctx, *words):
 
 @bot.command(name='disable', help='Tells Tucker not to tuck you in')
 async def disable(ctx):
-    disabled.append(ctx.author.id)
+    if ctx.author.id not in disabled:
+        disabled.append(ctx.author.id)
     store_disabled(ctx.author.id)
     await ctx.reply("Ok, disabled your goodnight messages")
 
