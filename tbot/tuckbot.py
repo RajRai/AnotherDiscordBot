@@ -56,7 +56,7 @@ async def announcement(ctx, *words):
 @commands.check(is_dev)
 async def status(ctx, *words):
     activity = discord.Game(name=" ".join(words))
-    await bot.change_presence(status=discord.Status.idle, activity=activity)
+    await bot.change_presence(status=discord.Status.online, activity=activity)
 
 
 @bot.command(name='disable', help='Tells Tucker not to tuck you in')
