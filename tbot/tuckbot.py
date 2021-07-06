@@ -6,17 +6,18 @@ from discord.ext import commands
 from datetime import datetime
 import pytz
 import random as rng
+import sys
 
 from tbot.atoken import TOKEN
 
 prefix = '^'
 
+debug = False
+
 bot = commands.Bot(command_prefix=prefix)
 
-channels = {}
-
-phrases = {}
-
+channels = {}  # {Guild: Channel}
+phrases = {}  # {Guild: [Phrases]}
 nicknames = {}  # {User: Nickname}
 
 
@@ -85,7 +86,7 @@ async def show_phrases(ctx):
         lst = []
     out = "Stored phrases:\n"
     for n in range(0, len(lst)):
-        out += f"{n+1}. {lst[n]}\n"
+        out += f"{n + 1}. {lst[n]}\n"
     if len(lst) == 0:
         out += "Nothing to see here yet..."
     await ctx.reply(out)
@@ -95,7 +96,7 @@ async def show_phrases(ctx):
 @commands.check(server_manager_or_dev)
 async def remove_phrase(ctx, which):
     try:
-        idx = int(which)-1
+        idx = int(which) - 1
     except ValueError:
         await ctx.reply(
             f"Sorry, but I was expecting a number referencing a stored phrase. Do {prefix}showphrases for the list.")
@@ -164,8 +165,6 @@ async def on_command_error(ctx, error):
         await ctx.reply("You lack the permissions to use that command...")
 
 
-
-
 @bot.event
 async def on_ready():
     global channels, phrases, nicknames
@@ -173,5 +172,26 @@ async def on_ready():
     phrases = get_stored_phrases(bot)
     nicknames = get_stored_nicknames()
 
+    print(channels)
+    print(phrases)
+    print(nicknames)
 
+    if debug:
+        for guild in list(channels.keys()):
+            if guild.name != "Raj's server":
+                channels.pop(guild)
+
+
+def parse_mode():
+    global debug
+    try:
+        for arg in sys.argv:
+            if arg in ("-d", "--debug"):
+                debug = True
+                print("Enabled debugging mode")
+    except Exception as err:
+        print(str(err))
+
+
+parse_mode()
 bot.run(TOKEN)
