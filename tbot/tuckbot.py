@@ -52,6 +52,13 @@ async def announcement(ctx, *words):
         await channels[guild].send(message)
 
 
+@bot.command(name='status', help='Dev use only')
+@commands.check(is_dev)
+async def status(ctx, *words):
+    activity = discord.Game(name=" ".join(words))
+    await bot.change_presence(status=discord.Status.idle, activity=activity)
+
+
 @bot.command(name='disable', help='Tells Tucker not to tuck you in')
 async def disable(ctx):
     if ctx.author.id not in disabled:
