@@ -40,7 +40,13 @@ def server_manager_or_dev(ctx):
 @bot.command(name='announcement', help='Dev use only')
 @commands.check(is_dev)
 async def announcement(ctx, *words):
-    message = " ".join(words)
+    sentence = []
+    for word in words:
+        if word == r'\n':
+            sentence.append('\n')
+        else:
+            sentence.append(word)
+    message = " ".join(sentence)
     for guild in channels:
         await channels[guild].send(message)
 
