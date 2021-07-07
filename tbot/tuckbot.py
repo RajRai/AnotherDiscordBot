@@ -59,6 +59,13 @@ async def status(ctx, *words):
     await bot.change_presence(status=discord.Status.online, activity=activity)
 
 
+@bot.command(name='watchingstatus', help='Dev use only')
+@commands.check(is_dev)
+async def watching_status(ctx, *words):
+    activity = discord.Activity(type=discord.ActivityType.watching, name=" ".join(words))
+    await bot.change_presence(status=discord.Status.online, activity=activity)
+
+
 @bot.command(name='disable', help='Tells Tucker not to tuck you in')
 async def disable(ctx):
     if ctx.author.id not in disabled:
@@ -208,7 +215,7 @@ async def on_ready():
     print(disabled)
 
     if debug:
-        await bot.change_presence(status=discord.Status.idle, activity=discord.Game(name='bot development simulator'))
+        await bot.change_presence(status=discord.Status.idle, activity=discord.Game(name='undergoing maintenance'))
         for guild in list(channels.keys()):
             if guild.name != "Raj's server":
                 channels.pop(guild)
