@@ -14,6 +14,8 @@ prefix = '^'
 
 debug = False
 
+debug_server_id = 825811502916436001
+
 bot = commands.Bot(command_prefix=prefix)
 
 channels = {}  # {Guild: Channel}
@@ -173,7 +175,7 @@ async def say_goodnight(member):
     else:
         tz = pytz.timezone('US/Eastern')
     now = datetime.now(tz)
-    if (now.hour >= 22 or now.hour <= 6 or (member.guild.name == "Raj's server")) and member.id not in disabled:
+    if (now.hour >= 22 or now.hour <= 6 or (member.guild.id == debug_server_id)) and member.id not in disabled:
         randomized_message = rng.choice(message_pool)
         try:
             if member.id in nicknames:
@@ -187,7 +189,7 @@ async def say_goodnight(member):
 @bot.event
 async def on_voice_state_update(member, before, after):
     if before.channel is not None and after.channel is None and not member.bot:
-        if member.guild.name != "Raj's server":
+        if member.guild.id != debug_server_id:
             await asyncio.sleep(15)
         if member is not None and member.voice is None:
             await say_goodnight(member)
@@ -217,7 +219,7 @@ async def on_ready():
     if debug:
         await bot.change_presence(status=discord.Status.idle, activity=discord.Game(name='undergoing maintenance'))
         for guild in list(channels.keys()):
-            if guild.name != "Raj's server":
+            if guild.id != debug_server_id:
                 channels.pop(guild)
     else:
         await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=f'{prefix}help for commands'))
