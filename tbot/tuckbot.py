@@ -138,6 +138,7 @@ async def remove_phrase(ctx, which):
     except ValueError:
         await ctx.reply(
             f"Sorry, but I was expecting a number referencing a stored phrase. Do {prefix}showphrases for the list.")
+        return
     phrase = phrases[ctx.guild][idx]
     del phrases[ctx.guild][idx]
     remove_stored_phrase(ctx.guild.id, phrase)
