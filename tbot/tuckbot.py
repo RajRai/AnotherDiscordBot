@@ -189,7 +189,9 @@ async def say_goodnight(member):
 
 @bot.event
 async def on_voice_state_update(member, before, after):
-    if before.channel is not None and after.channel is None and not member.bot:
+    channel = before.channel
+    if channel is not None and after.channel is None \
+            and not member.bot and channel.permissions_for(channel.guild.me).connect:
         if member.guild.id != debug_server_id:
             await asyncio.sleep(15)
         if member is not None and member.voice is None:
